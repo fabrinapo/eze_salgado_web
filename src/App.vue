@@ -66,7 +66,16 @@ onMounted(() => {
 </template>
 
 <style>
-/* Configuración de Lenis Scroll */
+/* 1. REGLA MAESTRA: PROHIBIDO EL SCROLL HORIZONTAL */
+html, body {
+  overflow-x: hidden !important;
+  width: 100%;
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
+/* Configuración de Lenis Scroll (ya la tenías, déjala igual) */
 html.lenis { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto; }
 .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
