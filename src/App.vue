@@ -31,7 +31,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="bg-patagonia text-mist font-sans selection:bg-clay selection:text-white relative min-h-screen">
+  <div class="bg-patagonia text-mist font-sans selection:bg-clay selection:text-white relative min-h-screen w-full overflow-x-hidden">
     
     <div class="fixed inset-0 pointer-events-none z-[100] opacity-[0.04] mix-blend-overlay"
          style="background-image: url('https://grainy-gradients.vercel.app/noise.svg');">

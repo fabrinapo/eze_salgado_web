@@ -94,8 +94,8 @@ const lineup = [
           </span>
 
           <span 
-            class="font-western text-mist group-hover:text-white transition-all duration-300 text-center drop-shadow-md"
-            :class="{
+            class="font-western text-mist group-hover:text-white transition-all duration-300 text-center drop-shadow-md break-words max-w-[90vw]"
+             :class="{
               'text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter opacity-100 py-2': item.size === 'giant',
               'text-2xl md:text-4xl tracking-tight opacity-90': item.size === 'mid',
               'text-lg md:text-xl tracking-widest opacity-60 font-sans font-bold uppercase': item.size === 'small'
