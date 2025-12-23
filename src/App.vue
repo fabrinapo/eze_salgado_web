@@ -81,3 +81,7 @@ html.lenis { height: auto; }
 .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
 .lenis.lenis-stopped { overflow: hidden; }
 </style>
+
+{
+  outline: 1px solid rgba(255, 0, 0, 0.2); 
+}
