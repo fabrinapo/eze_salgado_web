@@ -5,7 +5,7 @@ const services = [
     title: 'Harp Power Tour', 
     subtitle: 'Blues Eléctrico & Rock n Roll',
     desc: 'Show de alto impacto para festivales. Un recorrido eléctrico desde versiones de Pappo y ZZ Top hasta el Chicago Blues tradicional.', 
-    img: 'https://images.unsplash.com/photo-1501612780327-45045538702b?q=80&w=1000&auto=format&fit=crop',
+    img: 'https://i.ibb.co/6Rgr7tDx/Black-Cadillacs.jpg',
     cta: 'Ver Rider',
     link: '#rider',
     isPrimary: true // Flag para darle extra peso
@@ -15,7 +15,7 @@ const services = [
     title: 'Gitanos del Sur', 
     subtitle: 'World Music & Tango',
     desc: 'Propuesta acústica, íntima y refinada. Ejecución magistral de armónica cromática interpretando a Piazzolla y folklore argentino.', 
-    img: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?q=80&w=1000&auto=format&fit=crop',
+    img: 'https://i.ibb.co/6c39nZXS/Gitanos-del-sur.jpg',
     cta: null
   },
   { 
