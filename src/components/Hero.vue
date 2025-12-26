@@ -1,4 +1,7 @@
 <script setup lang="ts">
+const scrollToContact = () => {
+  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+};
 </script>
 
 <template>
@@ -27,14 +30,14 @@
         Harmonica Player &bull; Patagonia &bull; Blues
       </p>
 
-<div class="flex flex-col md:flex-row gap-6">
-  <a 
-    href="#contacto"
-    class="bg-clay hover:bg-white text-patagonia font-western text-lg px-10 py-4 rounded-sm border border-transparent shadow-lg shadow-clay/20 transition-all uppercase tracking-widest font-bold text-center flex items-center justify-center cursor-pointer"
-  >
-    Contactar
-  </a>
-</div>
+      <div class="flex flex-col md:flex-row gap-6">
+        <button 
+          @click="scrollToContact"
+          class="bg-clay hover:bg-white text-patagonia font-western text-lg px-10 py-4 rounded-sm border border-transparent shadow-lg shadow-clay/20 transition-all uppercase tracking-widest font-bold"
+        >
+          Contactar
+        </button>
+      </div>
 
     </div>
     
