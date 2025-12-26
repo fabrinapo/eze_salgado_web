@@ -12,7 +12,6 @@ interface Video {
 const videos = ref<Video[]>([]);
 const loading = ref(true);
 
-// Extrae ID de YouTube (soporta enlaces cortos, largos, mobile)
 const getYouTubeID = (url: string) => {
   if (!url) return null;
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -23,15 +22,11 @@ const getYouTubeID = (url: string) => {
 const parseCSV = (text: string) => {
   const rows = text.split('\n').slice(1);
   return rows.map(row => {
-    // Parser robusto para comas
     const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
-    
     const title = cols[0] || 'Sin título';
     const link = cols[1] || '';
     const id = getYouTubeID(link);
-    
     if (!id) return null;
-
     return { title, youtubeId: id };
   }).filter((v): v is Video => v !== null);
 };
@@ -66,8 +61,11 @@ onMounted(async () => {
           <div class="relative aspect-video bg-black rounded-sm overflow-hidden border border-white/10 group-hover:border-clay transition-colors shadow-2xl">
             <iframe 
               class="w-full h-full"
-              :src="`https://www.youtube.com/embed/${video.youtubeId}`" 
+              :src="`https://www.youtube.com/embed/${video.youtubeId}?preload=none`" 
               title="YouTube video player" 
+              width="560" 
+              height="315"
+              loading="lazy"
               frameborder="0" 
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
               allowfullscreen
