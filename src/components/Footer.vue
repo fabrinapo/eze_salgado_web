@@ -31,9 +31,9 @@ const currentYear = new Date().getFullYear();
         </a>
 
         <a 
-          href="#" 
+          href="https://wa.me/5492984876456" 
+          target="_blank"
           class="group relative px-10 py-5 bg-transparent border-2 border-mist/20 hover:border-green-500 transition-colors duration-300 min-w-[280px] cursor-pointer"
-          onclick="return false;" 
         >
            <span class="font-western text-mist text-2xl uppercase tracking-widest font-bold group-hover:text-green-400 transition-colors">
             WhatsApp
@@ -86,7 +86,7 @@ const currentYear = new Date().getFullYear();
           © {{ currentYear }} Ezequiel Salgado. Todos los derechos reservados.
         </p>
         <p class="font-sans text-[10px] text-gray-700 mt-2">
-          Design System: Nocturnal Soul
+          Web by Fabrizio Napolitano
         </p>
       </div>
 
