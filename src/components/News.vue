@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 
+// --- CONFIGURACIÓN ---
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQwOwdKKiQ1WaLS9VhnqVTvWk3LcvcwzihY_Vd4-Is6_yz_TlcIBSxJUzsMKEY0Bp0VGeVhfaAT_yZV/pub?gid=380682145&single=true&output=csv';
+
 interface NewsItem {
   id: number;
   date: string;
@@ -14,40 +17,58 @@ interface NewsItem {
 const newsList = ref<NewsItem[]>([]);
 const isLoadingInitial = ref(true);
 
-// TU LINK DE GOOGLE SHEET (Formato CSV)
-const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQwOwdKKiQ1WaLS9VhnqVTvWk3LcvcwzihY_Vd4-Is6_yz_TlcIBSxJUzsMKEY0Bp0VGeVhfaAT_yZV/pub?gid=380682145&single=true&output=csv';
-
-// 1. FUNCIÓN DE OPTIMIZACIÓN (Mantiene el SEO alto)
-const optimizeImage = (url: string) => {
-  if (!url) return 'https://placehold.co/600x400/1a1a1a/CD5D36?text=Cargando...';
-  if (url.startsWith('/') || url.includes('ezesalgado.com')) return url;
-  return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=600&q=80&output=webp`;
+// --- MANEJO DE ERRORES DE IMAGEN (El fix de TypeScript) ---
+const handleImageError = (event: Event) => {
+  // Le decimos a TS que el target es efectivamente una etiqueta IMG
+  const imgElement = event.target as HTMLImageElement;
+  if (imgElement) {
+    // Ponemos la imagen de respaldo
+    imgElement.src = 'https://placehold.co/600x400/101010/CD5D36?text=Ver+Noticia';
+  }
 };
 
-// 2. PARSEADOR ADAPTADO A TU EXCEL (2 Columnas: Fecha, Link)
+// --- LÓGICA DE DATOS ---
+
+const fetchMetadata = async (item: NewsItem) => {
+  try {
+    const response = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(item.link)}`);
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      const info = data.data;
+      item.title = info.title || 'Nueva fecha confirmada';
+      item.source = info.publisher || new URL(item.link).hostname.replace('www.', '');
+
+      if (info.image && info.image.url) {
+        item.image = info.image.url;
+      } else {
+        item.image = `https://api.microlink.io/?url=${encodeURIComponent(item.link)}&screenshot=true&meta=false&embed=screenshot.url`;
+      }
+    }
+  } catch (e) {
+    console.error('Error obteniendo info de:', item.link);
+  } finally {
+    item.loading = false;
+  }
+};
+
 const parseCSV = (csvText: string) => {
   const lines = csvText.split('\n');
   const items: NewsItem[] = [];
   
-  // Saltamos la fila 0 (encabezados)
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
-
-    // Separamos por comas. 
-    // Columna A (0) = Fecha
-    // Columna B (1) = Link
-    const cols = line.split(',').map(c => c.trim());
-
+    const cols = line.split(','); 
     if (cols.length >= 2) {
+      const cleanLink = cols[1]?.trim() || '#';
       items.push({
         id: i,
-        date: cols[0] || '',       
-        link: cols[1] || '#',
-        // Datos temporales mientras cargamos la info real
-        title: 'Cargando noticia...',
-        source: '...',
-        image: '', 
+        date: cols[0]?.trim() || '',       
+        link: cleanLink,
+        title: 'Cargando información...',
+        source: 'Prensa',
+        image: 'https://placehold.co/600x400/111111/333333?text=Cargando...', 
         loading: true
       });
     }
@@ -55,41 +76,15 @@ const parseCSV = (csvText: string) => {
   return items;
 };
 
-// 3. RECUPERAR METADATOS (Magia automática)
-const fetchMetadata = async (item: NewsItem) => {
-  try {
-    // Usamos Microlink para "leer" la noticia y sacar foto/título
-    const response = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(item.link)}`);
-    const data = await response.json();
-
-    if (data.status === 'success') {
-      item.title = data.data.title || 'Noticia sin título';
-      item.source = data.data.publisher || new URL(item.link).hostname.replace('www.', '');
-      // Si Microlink encuentra foto, la usamos. Si no, una genérica.
-      item.image = data.data.image?.url || 'https://placehold.co/600x400/101010/CD5D36?text=News';
-    }
-  } catch (e) {
-    console.error('Error al leer metadatos:', e);
-    item.title = 'Ver Noticia';
-  } finally {
-    item.loading = false;
-  }
-};
-
-// 4. CARGA DE DATOS
 onMounted(async () => {
   try {
     const response = await fetch(SHEET_URL);
     const text = await response.text();
-    const items = parseCSV(text);
-    newsList.value = items;
+    newsList.value = parseCSV(text);
     isLoadingInitial.value = false;
-
-    // Disparamos la búsqueda de info para cada noticia en segundo plano
-    items.forEach(item => fetchMetadata(item));
-
+    newsList.value.forEach(item => fetchMetadata(item));
   } catch (error) {
-    console.error('Error cargando sheet:', error);
+    console.error('Error cargando Sheet:', error);
     isLoadingInitial.value = false;
   }
 });
@@ -119,34 +114,36 @@ onMounted(async () => {
         >
           
           <div class="relative h-60 overflow-hidden bg-black">
-            <a :href="item.link" target="_blank" class="block w-full h-full cursor-pointer">
+            <a :href="item.link" target="_blank" class="block w-full h-full">
               
-              <div v-if="item.loading" class="w-full h-full bg-white/5 animate-pulse"></div>
-
               <img 
-                v-else
-                :src="optimizeImage(item.image)" 
-                :alt="item.title"
+                :src="item.image" 
+                alt="Portada noticia"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-90 group-hover:opacity-100"
                 loading="lazy"
-                class="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110 filter grayscale-[30%] group-hover:grayscale-0"
+                @error="handleImageError"
               />
               
-              <div class="absolute inset-0 bg-clay/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mix-blend-overlay"></div>
+              <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </a>
           </div>
 
-          <div class="p-6 flex flex-col flex-grow relative">
+          <div class="p-6 flex flex-col flex-grow relative bg-[#0a0a0a]">
             
             <div class="flex justify-between items-center mb-3">
-              <span class="text-brass text-[10px] font-bold uppercase tracking-widest">{{ item.date }}</span>
+              <span class="text-brass text-[10px] font-bold uppercase tracking-widest bg-brass/10 px-2 py-1 rounded">
+                {{ item.date }}
+              </span>
               <span class="text-gray-500 text-[10px] uppercase tracking-widest truncate max-w-[120px]">
-                {{ item.loading ? '...' : item.source }}
+                {{ item.source }}
               </span>
             </div>
 
-            <h3 class="font-western text-xl text-mist mb-4 leading-tight group-hover:text-clay transition-colors min-h-[3rem]">
+            <h3 class="font-western text-xl text-mist mb-4 leading-tight group-hover:text-clay transition-colors min-h-[3rem] line-clamp-3">
               <a :href="item.link" target="_blank">
-                <span v-if="item.loading" class="block h-6 w-3/4 bg-white/10 animate-pulse rounded"></span>
+                <span v-if="item.loading && item.title === 'Cargando información...'" class="animate-pulse text-gray-600">
+                  Buscando info...
+                </span>
                 <span v-else>{{ item.title }}</span>
               </a>
             </h3>
@@ -157,8 +154,8 @@ onMounted(async () => {
                 target="_blank"
                 class="inline-flex items-center text-[10px] font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-widest"
               >
-                Leer Nota
-                <span class="ml-2">→</span>
+                Leer Nota Completa
+                <span class="ml-2 group-hover:translate-x-1 transition-transform">→</span>
               </a>
             </div>
           </div>
