@@ -30,7 +30,7 @@ const gearItems = ref<GearItem[]>([
     title: 'Amplificación',
     subtitle: 'Fender • Vintage Electric • Marshall',
     desc: 'Armónica: Fender Hot Rod Deluxe o Vintage Ñu Twin/Superlead para un clean absoluto y gain ideal. Guitarra: El mítico Marshall JCM 900 + Caja 1960b con Celestion GB12.',
-    img: '/img/equipacion_amplificadores.webp',
+    img: '/img/equipacion_amplificadores.jpg',
     isSponsor: false
   },
   {
