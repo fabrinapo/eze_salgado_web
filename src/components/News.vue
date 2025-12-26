@@ -91,7 +91,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section id="videos" class="py-24 bg-patagonia relative border-t border-white/5">
+  <section id="News" class="py-24 bg-patagonia relative border-t border-white/5">
     
     <div class="container mx-auto px-6 max-w-7xl">
       

@@ -43,7 +43,7 @@ const navLinks = [
   { name: 'Videos', href: '#videos' },
   { name: 'Servicios', href: '#services' },
   { name: 'Gear', href: '#gear' },
-  { name: 'Contacto', href: '#contact' },
+  { name: 'Contacto', href: '#footer' },
 ];
 </script>
 
