@@ -1,155 +1,170 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 
-// LINK DE GOOGLE SHEET (Pestaña Noticias)
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQwOwdKKiQ1WaLS9VhnqVTvWk3LcvcwzihY_Vd4-Is6_yz_TlcIBSxJUzsMKEY0Bp0VGeVhfaAT_yZV/pub?gid=380682145&single=true&output=csv';
-
-// INTERFAZ ESTRICTA
 interface NewsItem {
+  id: number;
   date: string;
-  originalLink: string;
+  link: string;
   title: string;
-  description: string;
+  source: string;
   image: string;
-  publisher: string;
   loading: boolean;
 }
 
-const news = ref<NewsItem[]>([]);
-const mainLoading = ref(true);
+const newsList = ref<NewsItem[]>([]);
+const isLoadingInitial = ref(true);
 
-const parseCSV = (text: string): NewsItem[] => {
-  const rows = text.split('\n').slice(1);
-  const mappedRows = rows.map((row) => {
-    // Parser que respeta comas dentro de comillas
-    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
-    
-    if (!cols[1] || !cols[1].startsWith('http')) return null;
+// TU LINK DE GOOGLE SHEET (Formato CSV)
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQwOwdKKiQ1WaLS9VhnqVTvWk3LcvcwzihY_Vd4-Is6_yz_TlcIBSxJUzsMKEY0Bp0VGeVhfaAT_yZV/pub?gid=380682145&single=true&output=csv';
 
-    return {
-      date: cols[0] || 'Reciente',
-      originalLink: cols[1],
-      title: '',             
-      description: '',       
-      publisher: '',        
-      loading: true, // Nace cargando
-      image: '/img/eze_salgado_bio.webp' // Placeholder inicial
-    };
-  });
-  return mappedRows.filter((n): n is NewsItem => n !== null);
+// 1. FUNCIÓN DE OPTIMIZACIÓN (Mantiene el SEO alto)
+const optimizeImage = (url: string) => {
+  if (!url) return 'https://placehold.co/600x400/1a1a1a/CD5D36?text=Cargando...';
+  if (url.startsWith('/') || url.includes('ezesalgado.com')) return url;
+  return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=600&q=80&output=webp`;
 };
 
+// 2. PARSEADOR ADAPTADO A TU EXCEL (2 Columnas: Fecha, Link)
+const parseCSV = (csvText: string) => {
+  const lines = csvText.split('\n');
+  const items: NewsItem[] = [];
+  
+  // Saltamos la fila 0 (encabezados)
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+
+    // Separamos por comas. 
+    // Columna A (0) = Fecha
+    // Columna B (1) = Link
+    const cols = line.split(',').map(c => c.trim());
+
+    if (cols.length >= 2) {
+      items.push({
+        id: i,
+        date: cols[0] || '',       
+        link: cols[1] || '#',
+        // Datos temporales mientras cargamos la info real
+        title: 'Cargando noticia...',
+        source: '...',
+        image: '', 
+        loading: true
+      });
+    }
+  }
+  return items;
+};
+
+// 3. RECUPERAR METADATOS (Magia automática)
 const fetchMetadata = async (item: NewsItem) => {
   try {
-    // Usamos Microlink para obtener foto y título
-    const apiUrl = `https://api.microlink.io?url=${encodeURIComponent(item.originalLink)}`;
-    const res = await fetch(apiUrl);
-    const json = await res.json();
-    
-    if (json.status === 'success') {
-      const data = json.data;
-      item.title = data.title || 'Nueva Publicación';
-      item.description = data.description || '';
-      // Si el link trae imagen, la usamos. Si no, dejamos la del músico.
-      item.image = data.image?.url || item.image; 
-      item.publisher = data.publisher || '';
-    } else {
-      item.title = 'Leer Noticia';
-      item.description = 'Haz clic para ver el contenido completo.';
+    // Usamos Microlink para "leer" la noticia y sacar foto/título
+    const response = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(item.link)}`);
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      item.title = data.data.title || 'Noticia sin título';
+      item.source = data.data.publisher || new URL(item.link).hostname.replace('www.', '');
+      // Si Microlink encuentra foto, la usamos. Si no, una genérica.
+      item.image = data.data.image?.url || 'https://placehold.co/600x400/101010/CD5D36?text=News';
     }
   } catch (e) {
-    console.error('Error fetching preview:', e);
-    item.title = 'Nota de Prensa';
+    console.error('Error al leer metadatos:', e);
+    item.title = 'Ver Noticia';
   } finally {
-    // ¡AQUÍ ESTÁ LA CLAVE! Al poner esto en false, Vue quita el esqueleto y muestra el texto.
-    item.loading = false; 
+    item.loading = false;
   }
 };
 
+// 4. CARGA DE DATOS
 onMounted(async () => {
   try {
-    const res = await fetch(CSV_URL);
-    const text = await res.text();
-    
-    // 1. Guardamos los datos en la variable reactiva
-    news.value = parseCSV(text);
-    
-    // 2. CORRECCIÓN: Iteramos sobre 'news.value' (la versión reactiva) 
-    // para que Vue detecte los cambios cuando llegue la info de Microlink.
-    news.value.forEach(item => fetchMetadata(item));
-    
-  } catch (e) { 
-    console.error(e); 
-  } finally { 
-    mainLoading.value = false; 
+    const response = await fetch(SHEET_URL);
+    const text = await response.text();
+    const items = parseCSV(text);
+    newsList.value = items;
+    isLoadingInitial.value = false;
+
+    // Disparamos la búsqueda de info para cada noticia en segundo plano
+    items.forEach(item => fetchMetadata(item));
+
+  } catch (error) {
+    console.error('Error cargando sheet:', error);
+    isLoadingInitial.value = false;
   }
 });
 </script>
 
 <template>
-  <section id="news" class="py-24 bg-surface relative overflow-hidden">
-    <div class="container mx-auto px-6 max-w-6xl">
-
-      <div class="flex items-end justify-between mb-12 border-b border-white/5 pb-6">
-        <div>
-          <span class="text-clay font-bold tracking-widest uppercase text-sm block mb-2">Prensa & Blog</span>
-          <h2 class="font-western text-4xl md:text-6xl text-mist">Últimas Novedades</h2>
-        </div>
+  <section id="videos" class="py-24 bg-patagonia relative border-t border-white/5">
+    
+    <div class="container mx-auto px-6 max-w-7xl">
+      
+      <div class="mb-16 text-center">
+        <h2 class="font-western text-4xl md:text-6xl text-mist mb-4">Prensa & Novedades</h2>
+        <p class="text-brass font-sans uppercase tracking-[0.3em] text-xs font-bold">Últimas Noticias</p>
+        <div class="h-px w-24 bg-brass/30 mx-auto mt-6"></div>
       </div>
 
-      <div v-if="mainLoading" class="text-center text-brass font-western">Buscando enlaces...</div>
+      <div v-if="isLoadingInitial" class="text-center py-12">
+        <div class="inline-block w-8 h-8 border-2 border-brass border-t-transparent rounded-full animate-spin"></div>
+      </div>
 
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        
         <article 
-          v-for="(item, i) in news" 
-          :key="i"
-          class="group bg-patagonia rounded-sm border border-transparent hover:border-brass/30 transition-all flex flex-col h-full overflow-hidden hover:-translate-y-1 duration-500 shadow-lg"
+          v-for="item in newsList" 
+          :key="item.id" 
+          class="group bg-surface/30 border border-white/5 hover:border-brass/30 transition-all duration-300 flex flex-col h-full rounded-sm overflow-hidden"
         >
-          <div class="h-48 overflow-hidden relative bg-black">
-            
-            <div v-if="item.loading" class="absolute inset-0 bg-white/10 animate-pulse z-20"></div>
-            
-            <img 
-              :src="item.image" 
-              :alt="item.title" 
-              class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 opacity-90 group-hover:opacity-100"
-              :class="{ 'opacity-0': item.loading }" 
-            >
-            
-            <div class="absolute top-0 right-0 bg-clay text-patagonia text-xs font-bold px-3 py-1 font-mono z-30">
-              {{ item.date }}
-            </div>
+          
+          <div class="relative h-60 overflow-hidden bg-black">
+            <a :href="item.link" target="_blank" class="block w-full h-full cursor-pointer">
+              
+              <div v-if="item.loading" class="w-full h-full bg-white/5 animate-pulse"></div>
+
+              <img 
+                v-else
+                :src="optimizeImage(item.image)" 
+                :alt="item.title"
+                loading="lazy"
+                class="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110 filter grayscale-[30%] group-hover:grayscale-0"
+              />
+              
+              <div class="absolute inset-0 bg-clay/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mix-blend-overlay"></div>
+            </a>
           </div>
 
           <div class="p-6 flex flex-col flex-grow relative">
             
-            <span v-if="!item.loading && item.publisher" class="text-brass/60 text-[10px] uppercase tracking-widest mb-2 font-bold block">
-              {{ item.publisher }}
-            </span>
-            
-            <div v-if="item.loading" class="space-y-3 mb-4">
-               <div class="h-4 bg-white/10 rounded w-3/4 animate-pulse"></div>
-               <div class="h-3 bg-white/5 rounded w-full animate-pulse"></div>
-               <div class="h-3 bg-white/5 rounded w-2/3 animate-pulse"></div>
+            <div class="flex justify-between items-center mb-3">
+              <span class="text-brass text-[10px] font-bold uppercase tracking-widest">{{ item.date }}</span>
+              <span class="text-gray-500 text-[10px] uppercase tracking-widest truncate max-w-[120px]">
+                {{ item.loading ? '...' : item.source }}
+              </span>
             </div>
-            
-            <div v-else>
-              <h3 class="font-western text-xl text-mist mb-3 leading-tight group-hover:text-clay transition-colors line-clamp-2">
-                {{ item.title }}
-              </h3>
-              <p class="font-sans text-sm text-gray-400 mb-6 line-clamp-3 font-light leading-relaxed">
-                {{ item.description }}
-              </p>
-            </div>
-            
+
+            <h3 class="font-western text-xl text-mist mb-4 leading-tight group-hover:text-clay transition-colors min-h-[3rem]">
+              <a :href="item.link" target="_blank">
+                <span v-if="item.loading" class="block h-6 w-3/4 bg-white/10 animate-pulse rounded"></span>
+                <span v-else>{{ item.title }}</span>
+              </a>
+            </h3>
+
             <div class="mt-auto pt-4 border-t border-white/5">
-              <a :href="item.originalLink" target="_blank" class="flex items-center text-xs font-bold text-mist hover:text-white uppercase tracking-widest transition-colors">
+              <a 
+                :href="item.link" 
+                target="_blank"
+                class="inline-flex items-center text-[10px] font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-widest"
+              >
                 Leer Nota
-                <span class="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+                <span class="ml-2">→</span>
               </a>
             </div>
           </div>
+
         </article>
+
       </div>
 
     </div>
