@@ -22,7 +22,7 @@ const gearItems = ref<GearItem[]>([
     desc: 'Desde 2022 soy endorser de esta innovadora marca. Buscando velocidad y fluidez, desarrollé mi set actual con los modelos Ting Harp, Solist y Lyra.',
     img: '/img/equipacion_armonicas.jpg',
     logo: '/img/logo_kongsheng.png', 
-    link: 'https://kongsheng.com',
+    link: 'https://kongshengharmonica.com/es',
     isSponsor: true
   },
   {

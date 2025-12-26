@@ -71,6 +71,7 @@ const navLinks = [
       </nav>
 
       <button 
+       aria-label="Abrir menú de navegación"
         @click="isOpen = !isOpen" 
         class="md:hidden relative z-[1000] w-10 h-10 flex flex-col justify-center items-center group"
       >

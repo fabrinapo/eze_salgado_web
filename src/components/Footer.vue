@@ -55,7 +55,7 @@ const currentYear = new Date().getFullYear();
                 <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke="currentColor" stroke-width="2"/>
               </svg>
             </div>
-            <span class="text-[10px] uppercase tracking-widest text-gray-500 group-hover:text-clay transition-colors">@eze_salgado</span>
+            <span class="text-[10px] uppercase tracking-widest text-gray-300 group-hover:text-clay transition-colors">@eze_salgado</span>
           </a>
 
           <a href="https://www.instagram.com/anvil.rock/" target="_blank" class="flex flex-col items-center group gap-2">
@@ -66,7 +66,7 @@ const currentYear = new Date().getFullYear();
                 <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke="currentColor" stroke-width="2"/>
               </svg>
             </div>
-            <span class="text-[10px] uppercase tracking-widest text-gray-500 group-hover:text-brass transition-colors">@anvil.rock</span>
+            <span class="text-[10px] uppercase tracking-widest text-gray-300 group-hover:text-brass transition-colors">@anvil.rock</span>
           </a>
 
           <a href="https://www.facebook.com/ezequiel.salgado" target="_blank" class="flex flex-col items-center group gap-2">
@@ -75,7 +75,7 @@ const currentYear = new Date().getFullYear();
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.791-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
               </svg>
             </div>
-            <span class="text-[10px] uppercase tracking-widest text-gray-500 group-hover:text-blue-500 transition-colors">Facebook</span>
+            <span class="text-[10px] uppercase tracking-widest text-gray-300 group-hover:text-blue-500 transition-colors">Facebook</span>
           </a>
 
         </div>

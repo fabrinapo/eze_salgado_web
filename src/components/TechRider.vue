@@ -104,7 +104,7 @@ const monitors = [
           </div>
 
           <div class="mt-12 text-center pt-8 border-t border-white/5">
-             <a href="#" class="inline-block text-xs font-bold text-gray-500 hover:text-white border-b border-transparent hover:border-white transition-all uppercase tracking-widest">
+             <a href="#" class="inline-block text-xs font-bold text-gray-300 hover:text-white border-b border-transparent hover:border-white transition-all uppercase tracking-widest">
                Descargar Rider en PDF
              </a>
           </div>

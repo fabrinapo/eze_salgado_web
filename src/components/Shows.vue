@@ -116,7 +116,7 @@ onMounted(async () => {
 
           <div class="w-full md:w-1/4 flex items-center justify-start md:justify-end gap-4">
             
-            <span v-if="show.estado" class="font-mono text-[10px] uppercase text-gray-500 border border-white/10 px-2 py-1 rounded-sm">
+            <span v-if="show.estado" class="font-mono text-[10px] uppercase text-gray-300 border border-white/10 px-2 py-1 rounded-sm">
               {{ show.estado }}
             </span>
 

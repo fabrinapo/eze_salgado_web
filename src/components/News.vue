@@ -134,7 +134,7 @@ onMounted(async () => {
               <span class="text-brass text-[10px] font-bold uppercase tracking-widest bg-brass/10 px-2 py-1 rounded">
                 {{ item.date }}
               </span>
-              <span class="text-gray-500 text-[10px] uppercase tracking-widest truncate max-w-[120px]">
+              <span class="text-gray-300 text-[10px] uppercase tracking-widest truncate max-w-[120px]">
                 {{ item.source }}
               </span>
             </div>
@@ -152,7 +152,7 @@ onMounted(async () => {
               <a 
                 :href="item.link" 
                 target="_blank"
-                class="inline-flex items-center text-[10px] font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-widest"
+                class="inline-flex items-center text-[10px] font-bold text-gray-300 hover:text-white transition-colors uppercase tracking-widest"
               >
                 Leer Nota Completa
                 <span class="ml-2 group-hover:translate-x-1 transition-transform">→</span>
